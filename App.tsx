@@ -1,12 +1,18 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { Column } from './components/Column';
 import { AddTaskModal } from './components/AddTaskModal';
+import { LoginPage } from './components/LoginPage';
 import { PROJECTS, COLUMNS, INITIAL_TASKS, USERS } from './constants';
 import { Task, Status, Priority } from './types';
 import { Search, Bell, Sparkles, Filter, Menu } from 'lucide-react';
 
 const App: React.FC = () => {
+  // Auth State
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isAuthChecking, setIsAuthChecking] = useState<boolean>(true);
+
+  // App State
   const [activeProjectId, setActiveProjectId] = useState<string>(PROJECTS[0].id);
   const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
   const [searchQuery, setSearchQuery] = useState('');
@@ -20,6 +26,34 @@ const App: React.FC = () => {
 
   // Drag and Drop State
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
+
+  // Check auth on mount
+  useEffect(() => {
+    const checkAuth = () => {
+      const authCookie = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('kanban-auth='));
+      
+      if (authCookie && authCookie.split('=')[1] === 'true') {
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+      }
+      setIsAuthChecking(false);
+    };
+
+    checkAuth();
+  }, []);
+
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    // Clear cookie
+    document.cookie = "kanban-auth=; path=/; max-age=0";
+    setIsAuthenticated(false);
+  };
 
   const activeProject = PROJECTS.find(p => p.id === activeProjectId);
 
@@ -84,6 +118,21 @@ const App: React.FC = () => {
 
   const currentColumnTitle = COLUMNS.find(c => c.id === targetColumn)?.title || '';
 
+  // Render Loading
+  if (isAuthChecking) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center bg-slate-50">
+        <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  // Render Login
+  if (!isAuthenticated) {
+    return <LoginPage onLogin={handleLogin} />;
+  }
+
+  // Render Dashboard
   return (
     <div className="flex h-[100dvh] w-full bg-white font-sans text-slate-900 overflow-hidden">
       
@@ -102,6 +151,7 @@ const App: React.FC = () => {
           activeProjectId={activeProjectId} 
           onSelectProject={setActiveProjectId} 
           onCloseMobile={() => setIsMobileMenuOpen(false)}
+          onLogout={handleLogout}
         />
       </div>
 

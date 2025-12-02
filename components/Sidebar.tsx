@@ -1,15 +1,16 @@
 import React from 'react';
 import { Project } from '../types';
-import { Layout, Settings, Users, PlusCircle, Command, X } from 'lucide-react';
+import { Layout, Settings, Users, PlusCircle, Command, X, LogOut } from 'lucide-react';
 
 interface SidebarProps {
   projects: Project[];
   activeProjectId: string;
   onSelectProject: (id: string) => void;
   onCloseMobile?: () => void;
+  onLogout?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onSelectProject, onCloseMobile }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onSelectProject, onCloseMobile, onLogout }) => {
   return (
     <aside className="bg-slate-900 text-slate-300 flex flex-col h-full border-r border-slate-800 w-full">
       {/* Brand & Mobile Close */}
@@ -83,7 +84,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onS
 
       {/* User Footer */}
       <div className="p-4 border-t border-slate-800 bg-slate-900/50 shrink-0">
-        <button className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800 transition-colors">
+        <div className="flex items-center gap-3 p-2 rounded-lg bg-slate-800/50">
           <img 
             src="https://picsum.photos/100/100?random=user" 
             alt="User" 
@@ -93,8 +94,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ projects, activeProjectId, onS
             <p className="text-sm font-medium text-white truncate">Demo User</p>
             <p className="text-xs text-slate-500 truncate">Pro Plan</p>
           </div>
-          <Command size={14} className="text-slate-500 hidden sm:block" />
-        </button>
+          
+          <button 
+            onClick={onLogout}
+            className="text-slate-400 hover:text-red-400 hover:bg-slate-700/50 p-1.5 rounded-md transition-colors"
+            title="退出登录"
+          >
+            <LogOut size={16} />
+          </button>
+        </div>
       </div>
     </aside>
   );
